@@ -1,0 +1,25 @@
+{
+  "name": "escape-proxy-electron",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron ./src",
+    "build-macOS": "electron-packager ./src EP --platform=darwin --arch=x64 --overwrite",
+    "build-windows": "electron-packager ./src EPs --platform=win32 --arch=x64 --overwrite"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NISHI3/escape-proxy-electron.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/NISHI3/escape-proxy-electron/issues"
+  },
+  "homepage": "https://github.com/NISHI3/escape-proxy-electron#readme",
+  "devDependencies": {
+    "electron": "^4.0.6",
+    "electron-packager": "^13.1.0"
+  }
+}
