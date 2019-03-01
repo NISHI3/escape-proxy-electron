@@ -14,7 +14,7 @@ app.on('ready',  () => {
     app.dock.hide();
     win.loadFile('index.html');
     tray.on('click', () => {
-        // win.isVisible() ? win.hide() : win.show()
+        win.isVisible() ? win.hide() : win.show()
     })
     win.on('show', () => {
         tray.setHighlightMode('always')
