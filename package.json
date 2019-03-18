@@ -4,12 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w",
-    "lint": "tslint -c tslint.json -p tsconfig.json",
-    "start": "npm run build && electron ./dist/main.js",
-    "build-macOS": "electron-packager ./src EP --platform=darwin --arch=x64 --overwrite",
-    "build-windows": "electron-packager ./src EPs --platform=win32 --arch=x64 --overwrite"
+    "webpack": "webpack",
+    "start": "npm run webpack && electron src/dist",
+    "build-macOS": "npm run webpack && NODE_ENV=production electron-packager src/dist EP --platform=darwin --arch=x64 --overwrite --ignore=node_modules",
+    "build-windows": "npm run webpack && NODE_ENV=production electron-packager src/dist EP --platform=win32 --arch=x64 --overwrite --ignore=node_modules"
   },
   "repository": {
     "type": "git",
@@ -21,12 +19,20 @@
     "url": "https://github.com/NISHI3/escape-proxy-electron/issues"
   },
   "homepage": "https://github.com/NISHI3/escape-proxy-electron#readme",
+  "dependencies": {
+    "vue": "^2.6.8"
+  },
   "devDependencies": {
-    "electron": "^4.0.6",
-    "electron-packager": "^13.1.0",
-    "ts-loader": "^5.3.3",
-    "typescript": "^3.3.3333",
+    "css-loader": "^2.1.1",
+    "electron": "^4.1.0",
+    "electron-packager": "^13.1.1",
+    "html-webpack-plugin": "^3.2.0",
+    "sass-loader": "^7.1.0",
+    "vue-loader": "^15.7.0",
+    "vue-style-loader": "^4.1.2",
+    "vue-template-compiler": "^2.6.8",
+    "vue-template-loader": "^1.0.0",
     "webpack": "^4.29.6",
-    "webpack-cli": "^3.2.3"
+    "webpack-cli": "^3.3.0"
   }
 }
