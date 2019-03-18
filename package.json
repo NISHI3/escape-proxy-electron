@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "electron ./src",
+    "build": "tsc",
+    "watch": "tsc -w",
+    "lint": "tslint -c tslint.json -p tsconfig.json",
+    "start": "npm run build && electron ./dist/main.js",
     "build-macOS": "electron-packager ./src EP --platform=darwin --arch=x64 --overwrite",
     "build-windows": "electron-packager ./src EPs --platform=win32 --arch=x64 --overwrite"
   },
@@ -20,6 +23,10 @@
   "homepage": "https://github.com/NISHI3/escape-proxy-electron#readme",
   "devDependencies": {
     "electron": "^4.0.6",
-    "electron-packager": "^13.1.0"
+    "electron-packager": "^13.1.0",
+    "ts-loader": "^5.3.3",
+    "typescript": "^3.3.3333",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.2.3"
   }
 }
