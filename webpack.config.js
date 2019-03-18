@@ -1,4 +1,6 @@
 const path = require('path');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 // module.exports = {
 //     mode: 'development', // "production" | "development" | "none"
@@ -36,7 +38,8 @@ const mainConfig = {
       filename: 'main.js'
     },
     // __dirnameを使えるように
-    node: {__dirname: false}
+    node: {__dirname: false},
+    devtool: 'source-map',
     // module: {
     //   rules: [
     //     {
@@ -56,6 +59,7 @@ const mainConfig = {
       filename: 'renderer.js'
     },
     node: {__dirname: false},
+    devtool: 'source-map',
     module: {
       rules: []
     },
@@ -68,7 +72,15 @@ const mainConfig = {
       new HtmlWebpackPlugin({
         template: './src/index.html',
         inject: 'body'
-  }),
+      }),
+      new CopyWebpackPlugin([
+        { 
+          from: 'src/package.json'
+        },
+        {
+          from: path.resolve(__dirname, 'src/images/'),
+        }
+      ])
     ]
   }
   
