@@ -50,7 +50,8 @@ const mainConfig = {
           from: 'src/package.json'
         },
         {
-          from: path.resolve(__dirname, 'src/images/'),
+          from: 'src/images/',
+          to: 'images/'
         }
       ])
     ]
