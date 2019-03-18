@@ -5,23 +5,31 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const mainConfig = {
   mode: 'development',
   target: 'electron-main',
-  entry: './src/main.js',
+  entry: './src/main.ts',
   output: {
     path: path.join(__dirname, 'dist'),
     filename: 'main.js'
   },
   // __dirnameを使えるように
-  node: {__dirname: false},
+  node: {
+    __dirname: false
+  },
   devtool: 'source-map',
-  // module: {
-  //   rules: [
-  //     {
-  //       test: /\.js$/,
-  //       exclude: /node_modules/,
-  //       loader: 'babel-loader'
-  //     }
-  //   ]
-  // }
+  module: {
+    rules: [{
+      test: /.ts?$/,
+      include: [
+        path.resolve(__dirname, 'src'),
+      ],
+      exclude: [
+        path.resolve(__dirname, 'node_modules'),
+      ],
+      loader: 'ts-loader',
+    }]
+  },
+  resolve: {
+    extensions: ['.js', '.ts']
+  }
 }
   
 const rendererConfig = {
@@ -32,12 +40,24 @@ const rendererConfig = {
     path: path.join(__dirname, 'dist'),
     filename: 'renderer.js'
   },
-  node: {__dirname: false},
+  node: {
+    __dirname: false
+  },
   devtool: 'source-map',
   module: {
-    rules: []
+    rules: [{
+      test: /.ts?$/,
+      use: [
+        'ts-loader'
+      ],
+      include: [
+        path.resolve(__dirname, 'src'),
+        path.resolve(__dirname, 'node_modules'),
+      ],
+    }]
   },
   resolve: {
+    extensions: ['.json', '.js', '.css', '.ts', '.vue'],
     alias: {
       'vue$': 'vue/dist/vue.esm.js'
     }
@@ -49,11 +69,11 @@ const rendererConfig = {
     }),
     new CopyWebpackPlugin([
       { 
-        from: 'src/package.json'
+        from: path.resolve(__dirname, 'src/package.json')
       },
       {
-        from: 'src/images/',
-        to: 'images/'
+        from: path.resolve(__dirname, 'src/images/'),
+        to: path.resolve(__dirname, './dist/images/')
       }
     ])
   ]

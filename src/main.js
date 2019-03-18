@@ -43,12 +43,12 @@ app.on('activate', () => {
 });
 
 
-  // 非同期(Main)
-  ipcMain.on('asynchronous-message', (event, arg) => {
-    console.log(arg)  // ping
-    exec('ls -la ./', (err, stdout, stderr) => {
-        if (err) { console.log(err); }
-        event.sender.send('asynchronous-reply', stdout)
-      });
-    // event.sender.send('asynchronous-reply', 'pong2')
-  })
+// 非同期(Main)
+ipcMain.on('asynchronous-message', (event, arg) => {
+console.log(arg)  // ping
+exec('ls -la ./', (err, stdout, stderr) => {
+    if (err) { console.log(err); }
+    event.sender.send('asynchronous-reply', stdout)
+    });
+// event.sender.send('asynchronous-reply', 'pong2')
+})
