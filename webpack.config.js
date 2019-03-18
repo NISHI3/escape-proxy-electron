@@ -35,7 +35,7 @@ const mainConfig = {
 const rendererConfig = {
   mode: 'development',
   target: 'electron-renderer',
-  entry: './src/renderer.js',
+  entry: './src/renderer/renderer.js',
   output: {
     path: path.join(__dirname, 'dist'),
     filename: 'renderer.js'
