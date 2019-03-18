@@ -89,3 +89,6 @@ typings/
 # Build File
 EP-darwin-x64/
 EP-win32-x64/
+
+# 例のあれ
+package-lock.json
