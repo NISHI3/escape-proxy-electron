@@ -14,7 +14,7 @@ function createWindow() {
     // app.dock.hide();
     win.loadURL('file://' + __dirname + '/index.html')
     // 開発時のみ
-    process.env.NODE_ENV === 'production' ? '' : win.webContents.openDevTools()
+    win.webContents.openDevTools()
     win.on('closed', () => {
         win = null
     })

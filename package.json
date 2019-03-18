@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "webpack": "webpack",
-    "start": "npm run webpack && electron src/dist",
-    "build-macOS": "npm run webpack && NODE_ENV=production electron-packager src/dist EP --platform=darwin --arch=x64 --overwrite --ignore=node_modules",
-    "build-windows": "npm run webpack && NODE_ENV=production electron-packager src/dist EP --platform=win32 --arch=x64 --overwrite --ignore=node_modules"
+    "start": "npm run webpack && electron dist",
+    "build-macOS": "npm run webpack && NODE_ENV=production electron-packager dist EP --platform=darwin --arch=x64 --overwrite --ignore=node_modules",
+    "build-windows": "npm run webpack && NODE_ENV=production electron-packager dist EP --platform=win32 --arch=x64 --overwrite --ignore=node_modules"
   },
   "repository": {
     "type": "git",

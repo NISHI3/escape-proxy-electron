@@ -91,7 +91,7 @@ EP-darwin-x64/
 EP-win32-x64/
 
 # dist directory
-src/dist
+dist/
 
 # 例のあれ
 package-lock.json
