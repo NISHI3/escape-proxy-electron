@@ -7,7 +7,10 @@ npm run start
 
 ## Build
 * Mac   
-`npm run build-macOS`
+```
+npm run build-macOS
+open EP-darwin-x64
+```
 * Win   
-`build-windows`
+`npm run build-windows`
 
