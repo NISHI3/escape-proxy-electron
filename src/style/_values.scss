@@ -3,3 +3,12 @@ $red-white: rgb(255, 235, 238);
 
 //noinspection CssUnknownTarget
 $logo-x50-image: url("./images/icon_x50.png");
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}

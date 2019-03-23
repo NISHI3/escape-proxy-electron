@@ -31,7 +31,7 @@ class MainApp {
 
     private createWindow() {
         this.win = new BrowserWindow({
-            width: 300,
+            width: 350,
             height: 500,
             show: false,
             frame: false,

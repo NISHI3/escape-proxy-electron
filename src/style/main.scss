@@ -15,3 +15,8 @@ body {
 * {
     font-family: "游ゴシック体", "Yu Gothic", YuGothic, 'ヒラギノ角ゴ Pro W3', 'Hiragino Kaku Gothic Pro', 'メイリオ', Meiryo, 'ＭＳ Ｐゴシック', 'MS PGothic', sans-serif;
 }
+
+
+.selectable {
+    -webkit-user-select: text;
+}
