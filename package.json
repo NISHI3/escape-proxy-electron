@@ -26,10 +26,16 @@
   },
   "devDependencies": {
     "copy-webpack-plugin": "^5.0.1",
+    "css-loader": "^2.1.1",
     "electron-packager": "^13.1.1",
     "html-webpack-plugin": "^3.2.0",
+    "node-sass": "^4.11.0",
+    "sass-loader": "^7.1.0",
+    "style-loader": "^0.23.1",
+    "ts-loader": "^5.3.3",
+    "vue-loader": "^15.7.0",
+    "vue-template-compiler": "^2.6.10",
     "webpack": "^4.29.6",
-    "webpack-cli": "^3.3.0",
-    "ts-loader": "^5.3.3"
+    "webpack-cli": "^3.3.0"
   }
 }

@@ -95,3 +95,5 @@ dist/
 
 # 例のあれ
 package-lock.json
+
+.idea
