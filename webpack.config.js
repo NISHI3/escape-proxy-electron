@@ -135,6 +135,10 @@ const rendererConfig = {
             {
                 from: path.resolve(__dirname, "src/images/"),
                 to: path.resolve(__dirname, "./dist/images/")
+            },
+            {
+                from: path.resolve(__dirname, "src/bin/"),
+                to: path.resolve(__dirname, "./dist/bin/")
             }
         ])
     ]

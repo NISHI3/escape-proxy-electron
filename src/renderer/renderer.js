@@ -14,4 +14,3 @@ var vm = new Vue({
 ipcRenderer.on('asynchronous-reply', (event, arg) => {
     console.log(arg) // pong
 })
-ipcRenderer.send('asynchronous-message', 'ping1')

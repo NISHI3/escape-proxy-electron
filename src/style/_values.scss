@@ -3,6 +3,10 @@ $red-white: rgb(255, 235, 238);
 
 //noinspection CssUnknownTarget
 $logo-x50-image: url("./images/icon_x50.png");
+//noinspection CssUnknownTarget
+$cog-svg: url("./images/cog-solid.svg");
+
+$main-rows-height: 315px;
 
 @keyframes spin {
     0% {

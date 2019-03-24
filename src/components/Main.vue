@@ -4,49 +4,67 @@
             <div class="icon"></div>
             <div class="text">CERES PROXY</div>
         </div>
-        <div class="connect-button" :class="{loading: loading}" @click="connectToggle">{{ centerText }}</div>
-        <div class="sep"></div>
-        <div class="content">
-            <div v-if="proxyProcessRunning" class="active">
-                <div class="row">
-                    <div class="row-title">状態</div>
-                    <div class="row-content">{{ status }}</div>
-                </div>
-                <div class="row">
-                    <div class="row-title">接続先ホスト</div>
-                    <div class="row-content selectable">{{ connectHost }}</div>
-                </div>
-                <div class="row">
-                    <div class="row-title">接続先ポート</div>
-                    <div class="row-content selectable">{{ connectPort }}</div>
-                </div>
-                <div class="row">
-                    <div class="row-title">プロキシ</div>
-                    <div class="row-content" style="font-size: 12px;">{{ proxy }}</div>
-                </div>
+        <div class="config-show-non-active" :class="{ 'config-show': isConfigShow}">
+            <div class="cog" @click="configToggle"></div>
+            <div class="connect-button" :class="{loading: loading}" @click="connectToggle">{{ centerText }}
             </div>
-            <div v-else class="non-active">接続をクリックして<br>接続を開始してください。</div>
+            <div class="sep"></div>
+            <div class="content "
+                 :class="{'content-active': proxyProcessRunning }">
+                <div v-if="proxyProcessRunning || appError.length > 0" class="active">
+                    <div v-if="appError.length > 0">{{ appError }}</div>
+                    <InfoRows v-else :info="this.info"></InfoRows>
+                </div>
+                <div v-else class="non-active">接続をクリックして<br>接続を開始してください。</div>
+            </div>
         </div>
+        <transition>
+            <config v-if="isConfigShow"></config>
+        </transition>
     </div>
 </template>
 
 <script lang="js">
+    import {ipcRenderer} from "electron";
+    import ClientConfig from "../scripts/model/ClientConfig";
+    import ClientConfigGen from "../scripts/ClientConfigGen";
+    import Config from "./Config";
+    import InfoRows from "./InfoRows";
+
     export default {
         name: "Main",
+        components: {InfoRows, Config},
         data() {
             return {
-                flag: false,
+                running: false,
                 loadingCount: 0,
-                logText: "aaa\nbbb\nccc\nddd\eee"
+                logText: "",
+                appError: "",
+                isConfigShow: false,
+                info: {
+                    status: "...",
+                    connectHost: "",
+                    connectPort: "",
+                    proxy: "",
+                },
+                config: {
+                    proxy: "",
+                    gateway: "",
+                    listen: "",
+                }
             };
         },
         computed: {
             proxyProcessRunning() {
-                return this.flag;
+                return this.running;
             },
             centerText() {
                 if (this.loading) {
                     return "・・・";
+                }
+
+                if (this.appError.length > 0) {
+                    return "再接続";
                 }
 
                 if (this.proxyProcessRunning) {
@@ -65,41 +83,106 @@
             logArray() {
                 return this.logText.split("\n");
             },
-            status() {
-                return "...";
-            },
-            connectHost() {
-                return "localhost";
-            },
-            connectPort() {
-                return "40371";
-            },
-            proxy() {
-                return "xxxxxxxxxxxx";
-            }
         },
         methods: {
             incrementLoadingCount() {
                 this.loadingCount++;
             },
             decrementLoadingCount() {
+                if (this.loadingCount <= 0) {
+                    return;
+                }
                 this.loadingCount--;
             },
             connectToggle() {
                 if (this.loading) {
                     return;
                 }
+                this.appError = "";
                 this.incrementLoadingCount();
-                setTimeout(() => {
-                    this.flag = !this.flag;
-                    this.decrementLoadingCount();
-                }, 2000);
+                if (this.proxyProcessRunning) {
+                    ipcRenderer.send("disconnect-event", undefined);
+                } else {
+                    let config = new ClientConfigGen(this.config.proxy, this.config.gateway, this.config.port);
+                    ipcRenderer.send("connect-event", {
+                        "config": config.convertYaml(),
+                    });
+                }
+            },
+            setStatus(status) {
+                if (status === "unknown") {
+                    this.$set(this.info, "status", `・・・`);
+                } else {
+                    this.$set(this.info, "status", `${status} MODE`);
+                }
+            },
+            configToggle() {
+                console.log(this.isConfigShow);
+                this.isConfigShow = !this.isConfigShow;
             }
         },
+        created() {
+            ipcRenderer.on("connect-error", (event, arg) => {
+                console.log(arg);
+                if (arg.message === "null") {
+                    this.running = false;
+                    this.appError = "";
+                    this.decrementLoadingCount();
+                    return;
+                }
+                this.appError = arg.message;
+                this.decrementLoadingCount();
+                this.running = false;
+            });
+            ipcRenderer.on("connect-success", (event, arg) => {
+                this.appError = "";
+
+                this.$set(this.info, "status", "・・・");
+
+                const data = arg.data;
+                if (data) {
+                    if (data.listen) {
+                        const listen = data.listen.split(":");
+                        if (listen.length === 2) {
+                            this.$set(this.info, "connectHost", listen[0]);
+                            this.$set(this.info, "connectPort", listen[1]);
+                        }
+                    }
+
+                    if (data.proxy) {
+                        this.$set(this.info, "proxy", data.proxy);
+                    }
+                }
+                this.running = true;
+                this.decrementLoadingCount();
+            });
+            ipcRenderer.on("connect-info", (event, arg) => {
+                const data = arg.data;
+                if (data.title) {
+                    if (data.title === "CONNECT MODE") {
+                        this.setStatus(data.value);
+                    } else if (data.title === "ROUTE CHANGE") {
+                        this.setStatus(data.value.mode);
+                    }
+                }
+            });
+            ipcRenderer.on("connect-exit", (event, arg) => {
+                this.running = false;
+                this.appError = "";
+            });
+        }
     };
 </script>
 
 <style lang="scss" scoped>
+    .v-enter-active, .v-leave-active {
+        transition: opacity ease .2s;
+    }
+
+    .v-enter, .v-leave-to {
+        opacity: 0
+    }
+
     .title {
         $size: 50px;
         display: flex;
@@ -126,6 +209,32 @@
             background-repeat: no-repeat;
             margin-left: auto;
             opacity: .7;
+        }
+    }
+
+    .cog {
+        $size: 25px;
+        $_margin: 10px;
+        width: $size;
+        height: $size;
+        border-radius: 50%;
+        margin: ($_margin) ($_margin) (-($size + $_margin)) calc(100% - #{$size + $_margin});
+        background-color: white;
+        -webkit-mask-image: $cog-svg;
+        transition: background-color ease .2s, transform ease .2s;
+
+        &:hover {
+            background-color: rgba(white, .6);
+            transform: rotate(90deg);
+        }
+    }
+
+    .config-show-non-active {
+        transition: filter ease .2s, opacity ease .2s;
+
+        &.config-show {
+            filter: blur(15px);
+            opacity: 0;
         }
     }
 
@@ -178,34 +287,26 @@
     }
 
     .content {
-        $height: 165px;
-        height: $height;
+        height: $main-rows-height;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         font-size: 14px;
+        overflow-y: auto;
+
+        &.content-active {
+            justify-content: center;
+            align-items: stretch;
+        }
+
 
         .non-active {
             text-align: center;
         }
 
         .active {
-            width: 90%;
-
-            .row {
-                display: flex;
-                height: 30px;
-                line-height: 30px;
-
-                .row-title {
-                    width: 33%;
-                }
-
-                .row-content {
-                    width: 67%;
-                }
-            }
+            width: 100%;
         }
     }
 </style>

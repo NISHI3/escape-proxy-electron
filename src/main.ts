@@ -1,5 +1,6 @@
 import {app, App, BrowserWindow, ipcMain, IpcMain, Tray} from "electron";
-import {exec} from "child_process";
+import * as fs from "fs";
+import Client from "./scripts/Client";
 
 class MainApp {
     private win: BrowserWindow | undefined = undefined;
@@ -7,6 +8,7 @@ class MainApp {
     private app: App;
     private ipcMain: IpcMain;
     private indexPath: string = `file://${__dirname}/index.html`;
+    private client: Client | undefined;
 
     constructor(app: App, ipcMain: IpcMain) {
         this.app = app;
@@ -15,7 +17,9 @@ class MainApp {
         this.app.dock.hide();
         this.app.on("window-all-closed", this.onWindowAllClosed.bind(this));
         this.app.on("activate", this.onActivated.bind(this));
-        this.ipcMain.on("asynchronous-message", this.asyncMessage.bind(this));
+
+        this.ipcMain.on("connect-event", this.connect.bind(this));
+        this.ipcMain.on("disconnect-event", this.disconnect.bind(this));
 
         this.app.on("ready", () => {
             this.createTray();
@@ -31,8 +35,8 @@ class MainApp {
 
     private createWindow() {
         this.win = new BrowserWindow({
-            width: 350,
-            height: 500,
+            width: 400,
+            height: 650,
             show: false,
             frame: false,
             fullscreenable: false,
@@ -117,14 +121,21 @@ class MainApp {
         }
     }
 
-    private asyncMessage(event: any, arg: any) {
+    private connect(event: any, arg: any) {
         console.log(arg);
-        exec("ls -la ./", (err, stdout, stderr) => {
+        fs.writeFile("/tmp/ex.yaml", arg.config, "utf8", function (err) {
             if (err) {
-                console.log(err);
+                return console.log(err);
             }
-            event.sender.send("asynchronous-reply", stdout);
         });
+        this.client = new Client(event.sender);
+    }
+
+    private disconnect(event: any, arg: any) {
+        if (this.client === undefined) {
+            return;
+        }
+        this.client.disconnect();
     }
 }
 
