@@ -20,6 +20,7 @@ class MainApp {
 
         this.ipcMain.on("connect-event", this.connect.bind(this));
         this.ipcMain.on("disconnect-event", this.disconnect.bind(this));
+        this.ipcMain.on("test-event", this.testEvent.bind(this));
 
         this.app.on("ready", () => {
             this.createTray();
@@ -136,6 +137,13 @@ class MainApp {
             return;
         }
         this.client.disconnect();
+    }
+
+    private testEvent(event: any, arg: any) {
+        if (this.client === undefined) {
+            return;
+        }
+        this.client.testGet();
     }
 }
 

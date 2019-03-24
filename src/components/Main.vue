@@ -19,17 +19,17 @@
             </div>
         </div>
         <transition>
-            <config v-if="isConfigShow"></config>
+            <config v-if="isConfigShow" v-model="config" @close="isConfigShow = false"></config>
         </transition>
     </div>
 </template>
 
 <script lang="js">
     import {ipcRenderer} from "electron";
-    import ClientConfig from "../scripts/model/ClientConfig";
     import ClientConfigGen from "../scripts/ClientConfigGen";
     import Config from "./Config";
     import InfoRows from "./InfoRows";
+    import * as storage from "electron-json-storage";
 
     export default {
         name: "Main",
@@ -41,6 +41,7 @@
                 logText: "",
                 appError: "",
                 isConfigShow: false,
+                reGetCount: 0,
                 info: {
                     status: "...",
                     connectHost: "",
@@ -50,9 +51,18 @@
                 config: {
                     proxy: "",
                     gateway: "",
-                    listen: "",
+                    port: "41204",
                 }
             };
+        },
+        watch: {
+            config(val) {
+                storage.set("connect-config", val, function (error) {
+                    if (error) {
+                        console.error(error);
+                    }
+                });
+            }
         },
         computed: {
             proxyProcessRunning() {
@@ -103,11 +113,27 @@
                 if (this.proxyProcessRunning) {
                     ipcRenderer.send("disconnect-event", undefined);
                 } else {
+                    this.incrementLoadingCount();
                     let config = new ClientConfigGen(this.config.proxy, this.config.gateway, this.config.port);
                     ipcRenderer.send("connect-event", {
                         "config": config.convertYaml(),
                     });
+                    this.reGetCount = 0;
+                    this.testGet();
                 }
+            },
+            testGet(){
+                if(this.reGetCount > 20){
+                    this.decrementLoadingCount();
+                    return;
+                }
+                setTimeout(() => {
+                    if(this.loading) {
+                        ipcRenderer.send("test-event", undefined);
+                        this.testGet();
+                        this.reGetCount++;
+                    }
+                }, 1000);
             },
             setStatus(status) {
                 if (status === "unknown") {
@@ -122,6 +148,14 @@
             }
         },
         created() {
+            storage.get("connect-config", (error, data) => {
+                if (error) return;
+
+                if (Object.keys(data).length !== 0) {
+                    this.config = data;
+                }
+            });
+
             ipcRenderer.on("connect-error", (event, arg) => {
                 console.log(arg);
                 if (arg.message === "null") {
@@ -135,6 +169,8 @@
                 this.running = false;
             });
             ipcRenderer.on("connect-success", (event, arg) => {
+                this.reGetCount = 0;
+                this.testGet();
                 this.appError = "";
 
                 this.$set(this.info, "status", "・・・");
@@ -165,6 +201,7 @@
                         this.setStatus(data.value.mode);
                     }
                 }
+                this.decrementLoadingCount();
             });
             ipcRenderer.on("connect-exit", (event, arg) => {
                 this.running = false;

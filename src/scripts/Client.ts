@@ -1,9 +1,13 @@
 import {ChildProcess, spawn} from "child_process";
 
+const request = require("request");
+const Agent = require("socks5-http-client/lib/Agent");
+
 export default class Client {
     private sender: any;
     private buffer: Array<any> = [];
     private proc: ChildProcess | undefined;
+    private listenProxy: string = "";
 
     constructor(sender: any) {
         this.sender = sender;
@@ -19,14 +23,13 @@ export default class Client {
 
             if (json.title) {
                 if (json.title === "START UP") {
-                    sender.send("connect-success", {
-                        data: json.value,
-                        message: data.toString(),
-                    });
+                    this.listenProxy = json.value.listen;
+                    this.testGet();
+                    this.successEvent(json, text);
                 } else {
                     sender.send("connect-info", {
                         data: json,
-                        message: data.toString(),
+                        message: text,
                     });
                 }
             } else {
@@ -68,11 +71,38 @@ export default class Client {
 
     }
 
+    private successEvent(json: any, data: any) {
+        this.sender.send("connect-success", {
+            data: json.value,
+            message: data.toString(),
+        });
+    }
+
     public disconnect() {
         if (this.proc === undefined) {
             return;
         }
         this.proc.kill("SIGTERM");
         this.sender.send("connect-exit", undefined);
+    }
+
+    public testGet() {
+        const proxyArgs = this.listenProxy.split(":");
+        const proxyHost = proxyArgs[0];
+        let proxyPort = 41204;
+        if (proxyArgs.length === 2) {
+            proxyPort = Number(proxyArgs[1]);
+        }
+
+        request({
+            url: `http://example.com?t=${new Date().getTime()}`,
+            agentClass: Agent,
+            agentOptions: {
+                socksHost: proxyHost,
+                socksPort: proxyPort
+            }
+        }, (err: any, res: any) => {
+            console.log(err);
+        });
     }
 }

@@ -11,14 +11,14 @@
             <div class="row-title">SOCKS5 接続先ポート</div>
             <div class="row-content selectable">{{ info.connectPort }}</div>
         </div>
-        <div class="row">
-            <div class="row-title">SOCKS4 接続先ポート</div>
-            <div class="row-content selectable">{{ info.connectPort }}</div>
-        </div>
-        <div class="row">
-            <div class="row-title">HTTP 接続先ポート</div>
-            <div class="row-content selectable">{{ info.connectPort }}</div>
-        </div>
+        <!--<div class="row">-->
+            <!--<div class="row-title">SOCKS4 接続先ポート</div>-->
+            <!--<div class="row-content selectable">{{ info.connectPort }}</div>-->
+        <!--</div>-->
+        <!--<div class="row">-->
+            <!--<div class="row-title">HTTP 接続先ポート</div>-->
+            <!--<div class="row-content selectable">{{ info.connectPort }}</div>-->
+        <!--</div>-->
         <div class="row">
             <div class="row-title">プロキシ</div>
             <div class="row-content" style="font-size: 12px;">{{ info.proxy }}</div>
@@ -53,7 +53,8 @@
         }
 
         &.max-size {
-            height: $main-rows-height - (35px * 7) - 25px;
+            $row-number: 5;
+            height: $main-rows-height - (35px * $row-number) - 25px;
         }
 
         .row-title {
