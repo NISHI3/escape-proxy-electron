@@ -4,17 +4,21 @@
             {{ info.status }}
         </div>
         <div class="row">
+            <div class="row-title">接続モード</div>
+            <div class="row-content selectable">{{ info.status }}</div>
+        </div>
+        <div class="row">
+            <div class="row-title">状態</div>
+            <div class="row-content selectable">接続可能</div>
+        </div>
+        <div class="row">
             <div class="row-title">接続先ホスト</div>
             <div class="row-content selectable">{{ info.connectHost }}</div>
         </div>
         <div class="row">
-            <div class="row-title">SOCKS5 接続先ポート</div>
+            <div class="row-title">SOCKS 接続先ポート</div>
             <div class="row-content selectable">{{ info.connectPort }}</div>
         </div>
-        <!--<div class="row">-->
-            <!--<div class="row-title">SOCKS4 接続先ポート</div>-->
-            <!--<div class="row-content selectable">{{ info.connectPort }}</div>-->
-        <!--</div>-->
         <!--<div class="row">-->
             <!--<div class="row-title">HTTP 接続先ポート</div>-->
             <!--<div class="row-content selectable">{{ info.connectPort }}</div>-->
@@ -53,7 +57,7 @@
         }
 
         &.max-size {
-            $row-number: 5;
+            $row-number: 7;
             height: $main-rows-height - (35px * $row-number) - 25px;
         }
 

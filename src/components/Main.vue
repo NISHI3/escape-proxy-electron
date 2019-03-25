@@ -52,6 +52,7 @@
                     proxy: "",
                     gateway: "",
                     port: "41204",
+                    isAutoConnect: false,
                 }
             };
         },
@@ -114,6 +115,7 @@
                     ipcRenderer.send("disconnect-event", undefined);
                 } else {
                     this.incrementLoadingCount();
+                    console.log(this.config);
                     let config = new ClientConfigGen(this.config.proxy, this.config.gateway, this.config.port);
                     ipcRenderer.send("connect-event", {
                         "config": config.convertYaml(),
@@ -122,13 +124,13 @@
                     this.testGet();
                 }
             },
-            testGet(){
-                if(this.reGetCount > 20){
+            testGet() {
+                if (this.reGetCount > 20) {
                     this.decrementLoadingCount();
                     return;
                 }
                 setTimeout(() => {
-                    if(this.loading) {
+                    if (this.loading) {
                         ipcRenderer.send("test-event", undefined);
                         this.testGet();
                         this.reGetCount++;
@@ -153,6 +155,10 @@
 
                 if (Object.keys(data).length !== 0) {
                     this.config = data;
+                }
+
+                if (this.config.isAutoConnect) {
+                    this.connectToggle();
                 }
             });
 
@@ -287,6 +293,7 @@
         margin: 40px auto 40px auto;
         font-size: 30px;
         letter-spacing: 3px;
+        box-sizing: border-box;
         transition: background-color ease .2s;
 
         &:hover {
@@ -309,14 +316,34 @@
             transition: opacity ease .2s;
         }
 
+        &::after{
+            display: block;
+            $over-size: 30px;
+            $loading-size: $size + $over-size;
+            width: $size;
+            height: $size;
+            content: ' ';
+            margin: #{-$size - 3px} 0 #{-$size + 1px} -3px;
+            border-radius: 50%;
+            border: 1px solid $red-white;
+            animation: scale-animation 1.5s ease infinite;
+            box-sizing: border-box;
+            transition: opacity ease .2s;
+        }
+
         &.loading {
-            &:hover{
+            &:hover {
                 background-color: transparent;
             }
 
             &::before {
                 opacity: 1;
                 animation: spin 1s linear infinite;
+            }
+
+            &::after{
+                opacity: 0;
+                animation: none;
             }
         }
     }

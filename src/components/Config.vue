@@ -14,6 +14,11 @@
                 <label>LISTENポート</label>
                 <input id="port" type="text" placeholder="Port" v-model="inputData.port">
             </div>
+            <div class="row one-line">
+                <label class="row-title">起動時に自動接続</label>
+                <input id="auto-connect" type="checkbox" v-model="inputData.isAutoConnect">
+                <label for="auto-connect" class="row-content"></label>
+            </div>
         </div>
 
         <div class="bottom-fix">
@@ -71,12 +76,25 @@
                 line-height: 63px;
                 margin: 20px 15px;
 
+                &.one-line {
+                    display: flex;
+                    height: 40px;
+                    line-height: 40px;
+                }
+
                 label {
                     display: block;
                     font-size: 13px;
                     height: 20px;
                     line-height: 20px;
                     margin-bottom: 3px;
+                }
+
+                &.one-line label.row-title {
+                    width: 35%;
+                    height: 40px;
+                    line-height: 40px;
+                    margin: 0;
                 }
 
                 input {
@@ -101,6 +119,49 @@
 
                     &::placeholder {
                         color: rgba(white, .7);
+                    }
+                }
+
+                &.one-line .row-content {
+                    width: 35%;
+                    height: 40px;
+                    line-height: 40px;
+                    margin: 0;
+                }
+
+                #auto-connect {
+                    $height: 25px;
+                    $width: 60px;
+                    display: none;
+
+                    & + label {
+                        width: $width;
+                        height: $height;
+                        box-sizing: border-box;
+                        margin: #{(40px - $height) / 2} 0;
+                        border-radius: 15px;
+                        border: 1px solid rgba(white, .7);
+                        background-color: white;
+                        transition: background-color ease .3s;
+
+                        &::after {
+                            background-color: $main-color;
+                            width: $height - 2px;
+                            height: $height - 2px;
+                            border-radius: 50%;
+                            content: ' ';
+                            display: block;
+                            box-sizing: border-box;
+                            transition: transform ease .3s;
+                        }
+                    }
+
+                    &:checked + label {
+                        background-color: rgb(251, 192, 45);
+
+                        &::after {
+                            transform: translateX(#{$width - $height});
+                        }
                     }
                 }
             }
