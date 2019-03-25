@@ -206,6 +206,7 @@
             ipcRenderer.on("connect-exit", (event, arg) => {
                 this.running = false;
                 this.appError = "";
+                this.decrementLoadingCount();
             });
         }
     };

@@ -1,6 +1,9 @@
-import {app, App, BrowserWindow, ipcMain, IpcMain, Tray} from "electron";
+import {app, App, BrowserWindow, ipcMain, IpcMain, Tray, Menu, MenuItemConstructorOptions} from "electron";
 import * as fs from "fs";
 import Client from "./scripts/Client";
+import PlatformUtils from "./scripts/PlatformUtils";
+import {Platform} from "./scripts/model/Platform";
+import DevelopUtils from "./scripts/DevelopUtils";
 
 class MainApp {
     private win: BrowserWindow | undefined = undefined;
@@ -10,6 +13,7 @@ class MainApp {
     private indexPath: string = `file://${__dirname}/index.html`;
     private client: Client | undefined;
     private path: string = "";
+    private settingFile = PlatformUtils.getTempFile();
 
     constructor(app: App, ipcMain: IpcMain) {
         this.app = app;
@@ -17,7 +21,9 @@ class MainApp {
 
         this.path = app.getAppPath();
 
-        this.app.dock.hide();
+        if (PlatformUtils.isMac()) {
+            this.app.dock.hide();
+        }
         this.app.on("window-all-closed", this.onWindowAllClosed.bind(this));
         this.app.on("activate", this.onActivated.bind(this));
 
@@ -26,23 +32,32 @@ class MainApp {
         this.ipcMain.on("test-event", this.testEvent.bind(this));
 
         this.app.on("ready", () => {
+            this.setupMenus();
             this.createTray();
             this.createWindow();
         });
     }
 
     private onWindowAllClosed() {
-        if (process.platform !== "darwin") {
+        if (PlatformUtils.getPlatform() !== Platform.Mac) {
             this.app.quit();
         }
     }
 
     private createWindow() {
+        let windowHeight = 650;
+        if (PlatformUtils.getPlatform() === Platform.Windows) {
+            if (DevelopUtils.isDev()) {
+                windowHeight += 50;
+            } else {
+                windowHeight += 40;
+            }
+        }
         this.win = new BrowserWindow({
             width: 400,
-            height: 650,
-            show: false,
-            frame: false,
+            height: windowHeight,
+            show: PlatformUtils.isWindows(),
+            frame: PlatformUtils.isWindows(),
             fullscreenable: false,
             resizable: false,
             transparent: true,
@@ -51,11 +66,20 @@ class MainApp {
             }
         });
 
-        console.log(process.env.NODE_ENV);
-        if (process.env.NODE_ENV === "development") {
+        if (DevelopUtils.isDev()) {
             this.win.webContents.openDevTools({mode: "detach"});
         }
         this.win.loadURL(this.indexPath);
+        this.win.on("close", (event: Event) => {
+            if (PlatformUtils.isWindows()) {
+                if (this.win === undefined) {
+                    return;
+                }
+                this.win.hide();
+
+                event.preventDefault();
+            }
+        });
         this.win.on("closed", () => {
             this.win = undefined;
         });
@@ -67,6 +91,27 @@ class MainApp {
                 this.win.hide();
             }
         });
+    }
+
+    private setupMenus() {
+        var template: Array<MenuItemConstructorOptions> = [
+            {
+                label: "Edit",
+                submenu: [
+                    {role: "undo"},
+                    {role: "redo"},
+                    {type: "separator"},
+                    {role: "cut"},
+                    {role: "copy"},
+                    {role: "paste"},
+                    {role: "pasteandmatchstyle"},
+                    {role: "delete"},
+                    {role: "selectall"}
+                ]
+            }
+        ];
+
+        Menu.setApplicationMenu(Menu.buildFromTemplate(template));
     }
 
     private createTray() {
@@ -96,10 +141,16 @@ class MainApp {
             return;
         }
 
-        this.win.setPosition(position.x, position.y, false);
+        if (PlatformUtils.isWindows()) {
+            this.win.center();
+        } else {
+            this.win.setPosition(position.x, position.y, false);
+        }
         this.win.show();
         this.win.focus();
-        this.win.setAlwaysOnTop(true);
+        if (PlatformUtils.isMac()) {
+            this.win.setAlwaysOnTop(true);
+        }
     }
 
     private getWindowPosition() {
@@ -107,16 +158,20 @@ class MainApp {
             return;
         }
 
-        const windowBounds = this.win.getBounds();
-        const trayBounds = this.tray.getBounds();
+        if (PlatformUtils.isWindows()) {
+            return {x: 0, y: 0};
+        } else {
+            const windowBounds = this.win.getBounds();
+            const trayBounds = this.tray.getBounds();
 
-        // Center window horizontally below the tray icon
-        const x = Math.round(trayBounds.x + (trayBounds.width / 2) - (windowBounds.width / 2));
+            // Center window horizontally below the tray icon
+            const x = Math.round(trayBounds.x + (trayBounds.width / 2) - (windowBounds.width / 2));
 
-        // Position window 4 pixels vertically below the tray icon
-        const y = Math.round(trayBounds.y + trayBounds.height + 4);
+            // Position window 4 pixels vertically below the tray icon
+            const y = Math.round(trayBounds.y + trayBounds.height + 4);
 
-        return {x: x, y: y};
+            return {x: x, y: y};
+        }
     }
 
     private onActivated() {
@@ -126,13 +181,12 @@ class MainApp {
     }
 
     private connect(event: any, arg: any) {
-        console.log(arg);
-        fs.writeFile("/tmp/ex.yaml", arg.config, "utf8", function (err) {
+        fs.writeFile(this.settingFile, arg.config, "utf8", function (err) {
             if (err) {
                 return console.log(err);
             }
         });
-        this.client = new Client(event.sender, this.path);
+        this.client = new Client(event.sender, this.path, this.settingFile);
     }
 
     private disconnect(event: any, arg: any) {

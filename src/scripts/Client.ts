@@ -1,7 +1,10 @@
 import {ChildProcess, spawn} from "child_process";
+import PlatformUtils from "./PlatformUtils";
+import * as child_process from "child_process";
 
 const request = require("request");
 const Agent = require("socks5-http-client/lib/Agent");
+const iconv = require("iconv-lite");
 
 export default class Client {
     private sender: any;
@@ -9,11 +12,16 @@ export default class Client {
     private proc: ChildProcess | undefined;
     private listenProxy: string = "";
 
-    constructor(sender: any, path: string) {
+    constructor(sender: any, path: string, settingFile: string) {
         this.sender = sender;
 
-        console.log(`${path}/bin/escape-proxy-mac`);
-        this.proc = spawn(`${path}/bin/escape-proxy-mac`, ["client", "-c", `"/tmp/ex.yaml"`], {shell: true});
+        if (PlatformUtils.isMac()) {
+            this.proc = spawn(`${path}/bin/escape-proxy-mac`, ["client", "-c", settingFile], {shell: true});
+        } else if (PlatformUtils.isWindows()) {
+            this.proc = spawn(`${path}/bin/escape-proxy-windows.exe`, ["client", "-c", settingFile], {shell: true});
+        } else {
+            return;
+        }
         this.proc.stdout.on("data", (data) => {
             const text = this.getLine(data).trim();
             if (text.length === 0) {
@@ -41,16 +49,21 @@ export default class Client {
         });
 
         this.proc.stderr.on("data", (data) => {
+            console.log(data, data.toString(), iconv.decode(data, "Shift_JIS").toString());
+            let text = data.toString();
+            if (PlatformUtils.isWindows()) {
+                text = iconv.decode(data, "Shift_JIS").toString();
+            }
             sender.send("connect-error", {
-                message: data.toString(),
+                message: text,
             });
         });
 
         this.proc.on("close", (code) => {
             console.log("ERROR", code);
-            sender.send("connect-error", {
-                message: String(code),
-            });
+            // sender.send("connect-error", {
+            //     message: String(code),
+            // });
         });
     }
 
@@ -61,7 +74,12 @@ export default class Client {
                 const returnStringBuffer = Buffer.alloc(this.buffer.length);
                 returnStringBuffer.set(this.buffer, 0);
                 this.buffer = [];
-                return returnStringBuffer.toString();
+
+                if (PlatformUtils.isWindows()) {
+                    return iconv.decode(returnStringBuffer, "Shift_JIS").toString();
+                } else {
+                    return returnStringBuffer.toString();
+                }
             }
             this.buffer.push(buffer[i]);
         }
@@ -83,8 +101,15 @@ export default class Client {
         if (this.proc === undefined) {
             return;
         }
-        this.proc.kill("SIGTERM");
-        this.sender.send("connect-exit", undefined);
+        if (PlatformUtils.isWindows()) {
+            child_process.exec(`taskkill /pid ${this.proc.pid} /T /F`, () => {
+                console.log("QUIT");
+                this.sender.send("connect-exit", undefined);
+            });
+        } else {
+            this.proc.kill("SIGTERM");
+            this.sender.send("connect-exit", undefined);
+        }
     }
 
     public testGet() {
