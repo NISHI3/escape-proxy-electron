@@ -4,6 +4,9 @@ import Client from "./scripts/Client";
 import PlatformUtils from "./scripts/PlatformUtils";
 import {Platform} from "./scripts/model/Platform";
 import DevelopUtils from "./scripts/DevelopUtils";
+import MenuItem = Electron.MenuItem;
+import remote = Electron.remote;
+import {exec} from "child_process";
 
 class MainApp {
     private win: BrowserWindow | undefined = undefined;
@@ -14,8 +17,13 @@ class MainApp {
     private client: Client | undefined;
     private path: string = "";
     private settingFile = PlatformUtils.getTempFile();
+    private exitFlag = false;
 
     constructor(app: App, ipcMain: IpcMain) {
+        if(!PlatformUtils.isWindows() && DevelopUtils.isDev()){
+            exec(`chmod -R a+x ${__dirname}/bin`)
+        }
+
         this.app = app;
         this.ipcMain = ipcMain;
 
@@ -72,7 +80,7 @@ class MainApp {
         this.win.loadURL(this.indexPath);
         this.win.on("close", (event: Event) => {
             if (PlatformUtils.isWindows()) {
-                if (this.win === undefined) {
+                if (this.win === undefined || this.exitFlag) {
                     return;
                 }
                 this.win.hide();
@@ -116,11 +124,30 @@ class MainApp {
 
     private createTray() {
         this.tray = new Tray(__dirname + "/images/tray-icon.png");
-        this.tray.on("right-click", this.toggleWindow);
         this.tray.on("double-click", this.toggleWindow);
         this.tray.on("click", (event) => {
             this.toggleWindow();
             if (this.win === undefined) return;
+        });
+
+        const contextMenu = Menu.buildFromTemplate([
+            {
+                label: "終了",
+                click: () => {
+                    this.exitFlag = true;
+                    this.app.quit();
+                }
+            }
+        ]);
+        if (this.tray === undefined) {
+            return;
+        }
+        this.tray.on("right-click", (e) => {
+            if (this.tray === undefined) {
+                return;
+            }
+            e.preventDefault();
+            this.tray.popUpContextMenu(contextMenu);
         });
     }
 

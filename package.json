@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "webpack": "webpack",
-    "start": "webpack --mode development && chmod -R a+x dist/bin && electron dist",
+    "start": "webpack --mode development && electron dist",
     "build-macOS": "webpack --mode production && NODE_ENV=production electron-packager dist CERES --platform=darwin --arch=x64 --overwrite --ignore=node_modules --icon=asset/mac-icon.icns && chmod -R  a+x CERES-darwin-x64/CERES.app/Contents/Resources/app/bin/ &&  npm run build-dmg",
     "build-windows": "webpack --mode production && set NODE_ENV=production && electron-packager dist CERES --platform=win32 --arch=x64 --overwrite --ignore=node_modules",
     "build-dmg": "cp asset/settings.py CERES-darwin-x64/ && cd CERES-darwin-x64/ && dmgbuild -s settings.py -D app=CERES.app \"CERES PROXY\" CERES.dmg"
