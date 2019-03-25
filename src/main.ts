@@ -1,4 +1,14 @@
-import {app, App, BrowserWindow, ipcMain, IpcMain, Tray, Menu, MenuItemConstructorOptions} from "electron";
+import {
+    app,
+    App,
+    BrowserWindow,
+    ipcMain,
+    IpcMain,
+    Tray,
+    Menu,
+    MenuItemConstructorOptions,
+    BrowserWindowConstructorOptions
+} from "electron";
 import * as fs from "fs";
 import Client from "./scripts/Client";
 import PlatformUtils from "./scripts/PlatformUtils";
@@ -20,8 +30,8 @@ class MainApp {
     private exitFlag = false;
 
     constructor(app: App, ipcMain: IpcMain) {
-        if(!PlatformUtils.isWindows() && DevelopUtils.isDev()){
-            exec(`chmod -R a+x ${__dirname}/bin`)
+        if (!PlatformUtils.isWindows() && DevelopUtils.isDev()) {
+            exec(`chmod -R a+x ${__dirname}/bin`);
         }
 
         this.app = app;
@@ -61,7 +71,7 @@ class MainApp {
                 windowHeight += 40;
             }
         }
-        this.win = new BrowserWindow({
+        const windowOption: BrowserWindowConstructorOptions = {
             width: 400,
             height: windowHeight,
             show: PlatformUtils.isWindows(),
@@ -72,7 +82,12 @@ class MainApp {
             webPreferences: {
                 backgroundThrottling: false
             }
-        });
+        };
+        if (PlatformUtils.isWindows()) {
+            windowOption.icon = `${__dirname}/images/icon-red_x50.png`;
+        }
+
+        this.win = new BrowserWindow(windowOption);
 
         if (DevelopUtils.isDev()) {
             this.win.webContents.openDevTools({mode: "detach"});
@@ -119,7 +134,9 @@ class MainApp {
             }
         ];
 
-        Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+        if(PlatformUtils.isMac()) {
+            Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+        }
     }
 
     private createTray() {
