@@ -1,4 +1,4 @@
-import {ChildProcess, spawn} from "child_process";
+import {ChildProcess, exec, spawn} from "child_process";
 import PlatformUtils from "./PlatformUtils";
 import * as child_process from "child_process";
 

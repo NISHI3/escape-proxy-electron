@@ -110,7 +110,7 @@ class MainApp {
             if (this.win === undefined) {
                 return;
             }
-            if (!this.win.webContents.isDevToolsOpened()) {
+            if (!this.win.webContents.isDevToolsOpened() && !PlatformUtils.isWindows()) {
                 this.win.hide();
             }
         });
@@ -134,7 +134,7 @@ class MainApp {
             }
         ];
 
-        if(PlatformUtils.isMac()) {
+        if (PlatformUtils.isMac()) {
             Menu.setApplicationMenu(Menu.buildFromTemplate(template));
         }
     }
@@ -230,7 +230,15 @@ class MainApp {
                 return console.log(err);
             }
         });
-        this.client = new Client(event.sender, this.path, this.settingFile);
+
+        if (PlatformUtils.isWindows()) {
+            exec("taskkill /IM escape-proxy-windows.exe /F", () => {
+                this.client = new Client(event.sender, this.path, this.settingFile);
+            });
+        } else {
+            this.client = new Client(event.sender, this.path, this.settingFile);
+        }
+
     }
 
     private disconnect(event: any, arg: any) {
