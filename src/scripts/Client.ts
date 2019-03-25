@@ -9,10 +9,11 @@ export default class Client {
     private proc: ChildProcess | undefined;
     private listenProxy: string = "";
 
-    constructor(sender: any) {
+    constructor(sender: any, path: string) {
         this.sender = sender;
 
-        this.proc = spawn("./bin/escape-proxy-mac", ["client", "-c", `"/tmp/ex.yaml"`], {shell: true});
+        console.log(`${path}/bin/escape-proxy-mac`);
+        this.proc = spawn(`${path}/bin/escape-proxy-mac`, ["client", "-c", `"/tmp/ex.yaml"`], {shell: true});
         this.proc.stdout.on("data", (data) => {
             const text = this.getLine(data).trim();
             if (text.length === 0) {

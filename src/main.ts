@@ -9,10 +9,13 @@ class MainApp {
     private ipcMain: IpcMain;
     private indexPath: string = `file://${__dirname}/index.html`;
     private client: Client | undefined;
+    private path: string = "";
 
     constructor(app: App, ipcMain: IpcMain) {
         this.app = app;
         this.ipcMain = ipcMain;
+
+        this.path = app.getAppPath();
 
         this.app.dock.hide();
         this.app.on("window-all-closed", this.onWindowAllClosed.bind(this));
@@ -47,7 +50,11 @@ class MainApp {
                 backgroundThrottling: false
             }
         });
-        this.win.webContents.openDevTools({mode: "detach"});
+
+        console.log(process.env.NODE_ENV);
+        if (process.env.NODE_ENV === "development") {
+            this.win.webContents.openDevTools({mode: "detach"});
+        }
         this.win.loadURL(this.indexPath);
         this.win.on("closed", () => {
             this.win = undefined;
@@ -69,10 +76,6 @@ class MainApp {
         this.tray.on("click", (event) => {
             this.toggleWindow();
             if (this.win === undefined) return;
-
-            if (this.win.isVisible() && process.defaultApp && event.metaKey) {
-                this.win.webContents.openDevTools({mode: "detach"});
-            }
         });
     }
 
@@ -129,7 +132,7 @@ class MainApp {
                 return console.log(err);
             }
         });
-        this.client = new Client(event.sender);
+        this.client = new Client(event.sender, this.path);
     }
 
     private disconnect(event: any, arg: any) {

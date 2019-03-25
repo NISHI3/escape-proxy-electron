@@ -6,7 +6,7 @@ const VueLoaderPlugin = require("vue-loader/lib/plugin");
 const enabledSourceMap = false;
 
 const mainConfig = {
-    mode: "development",
+    mode: process.env.NODE_ENV,
     target: "electron-main",
     entry: "./src/main.ts",
     output: {
@@ -36,7 +36,7 @@ const mainConfig = {
 };
 
 const rendererConfig = {
-    mode: "development",
+    mode: process.env.NODE_ENV,
     target: "electron-renderer",
     entry: "./src/renderer/renderer.js",
     output: {
@@ -137,7 +137,7 @@ const rendererConfig = {
                 to: path.resolve(__dirname, "./dist/images/")
             },
             {
-                from: path.resolve(__dirname, "src/bin/"),
+                from: path.resolve(__dirname, "bin/"),
                 to: path.resolve(__dirname, "./dist/bin/")
             }
         ])
