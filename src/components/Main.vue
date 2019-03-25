@@ -310,6 +310,10 @@
         }
 
         &.loading {
+            &:hover{
+                background-color: transparent;
+            }
+
             &::before {
                 opacity: 1;
                 animation: spin 1s linear infinite;
