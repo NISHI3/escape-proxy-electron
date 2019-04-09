@@ -110,7 +110,7 @@ class MainApp {
             if (this.win === undefined) {
                 return;
             }
-            if (!this.win.webContents.isDevToolsOpened() && !PlatformUtils.isWindows()) {
+            if (!this.win.webContents.isDevToolsOpened() && PlatformUtils.isMac()) {
                 this.win.hide();
             }
         });
@@ -141,7 +141,6 @@ class MainApp {
 
     private createTray() {
         this.tray = new Tray(__dirname + "/images/tray-icon.png");
-        this.tray.on("double-click", this.toggleWindow);
         this.tray.on("click", (event) => {
             this.toggleWindow();
             if (this.win === undefined) return;
@@ -159,6 +158,8 @@ class MainApp {
         if (this.tray === undefined) {
             return;
         }
+
+        this.tray.on("double-click", this.toggleWindow);
         this.tray.on("right-click", (e) => {
             if (this.tray === undefined) {
                 return;
@@ -187,9 +188,9 @@ class MainApp {
 
         if (PlatformUtils.isWindows()) {
             this.win.center();
-        } else if(PlatformUtils.isLinux()) {
+        } else if (PlatformUtils.isLinux()) {
             this.win.center();
-        } else if(PlatformUtils.isMac()) {
+        } else if (PlatformUtils.isMac()) {
             this.win.setPosition(position.x, position.y, false);
         }
         this.win.show();
