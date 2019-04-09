@@ -19,6 +19,8 @@ export default class Client {
             this.proc = spawn(`${path}/bin/escape-proxy-mac`, ["client", "-c", settingFile], {shell: true});
         } else if (PlatformUtils.isWindows()) {
             this.proc = spawn(`${path}/bin/escape-proxy-windows.exe`, ["client", "-c", settingFile], {shell: true});
+        } else if (PlatformUtils.isLinux()) {
+            this.proc = spawn(`${path}/bin/escape-proxy-linux`, ["client", "-c", settingFile]);
         } else {
             return;
         }
@@ -106,7 +108,13 @@ export default class Client {
                 console.log("QUIT");
                 this.sender.send("connect-exit", undefined);
             });
-        } else {
+        } else if (PlatformUtils.isLinux()) {
+            console.log(`kill -9 ${this.proc.pid}`);
+            child_process.exec(`kill -9 ${this.proc.pid}`, (error, stdout, stderr) => {
+                console.log("QUIT");
+                this.sender.send("connect-exit", undefined);
+            });
+        } else if (PlatformUtils.isMac()) {
             this.proc.kill("SIGTERM");
             this.sender.send("connect-exit", undefined);
         }

@@ -64,7 +64,7 @@ class MainApp {
 
     private createWindow() {
         let windowHeight = 650;
-        if (PlatformUtils.getPlatform() === Platform.Windows) {
+        if (PlatformUtils.isWindows() || PlatformUtils.isLinux()) {
             if (DevelopUtils.isDev()) {
                 windowHeight += 50;
             } else {
@@ -75,7 +75,7 @@ class MainApp {
             width: 400,
             height: windowHeight,
             show: PlatformUtils.isWindows(),
-            frame: PlatformUtils.isWindows(),
+            frame: !PlatformUtils.isMac(),
             fullscreenable: false,
             resizable: false,
             transparent: true,
@@ -83,7 +83,7 @@ class MainApp {
                 backgroundThrottling: false
             }
         };
-        if (PlatformUtils.isWindows()) {
+        if (PlatformUtils.isWindows() || PlatformUtils.isLinux()) {
             windowOption.icon = `${__dirname}/images/icon-red_x50.png`;
         }
 
@@ -94,7 +94,7 @@ class MainApp {
         }
         this.win.loadURL(this.indexPath);
         this.win.on("close", (event: Event) => {
-            if (PlatformUtils.isWindows()) {
+            if (PlatformUtils.isWindows() || PlatformUtils.isLinux()) {
                 if (this.win === undefined || this.exitFlag) {
                     return;
                 }
@@ -187,12 +187,14 @@ class MainApp {
 
         if (PlatformUtils.isWindows()) {
             this.win.center();
-        } else {
+        } else if(PlatformUtils.isLinux()) {
+            this.win.center();
+        } else if(PlatformUtils.isMac()) {
             this.win.setPosition(position.x, position.y, false);
         }
         this.win.show();
         this.win.focus();
-        if (PlatformUtils.isMac()) {
+        if (PlatformUtils.isMac() || PlatformUtils.isLinux()) {
             this.win.setAlwaysOnTop(true);
         }
     }

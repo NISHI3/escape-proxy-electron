@@ -11,6 +11,10 @@ export default class PlatformUtils {
         return PlatformUtils.getPlatform() === Platform.Mac;
     }
 
+    static isLinux(): boolean {
+        return PlatformUtils.getPlatform() === Platform.Linux;
+    }
+
     static getPlatform(): Platform {
         switch (process.platform) {
             case "win32":

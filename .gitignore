@@ -91,6 +91,7 @@ EP-darwin-x64/
 EP-win32-x64/
 CERES-darwin-x64/
 CERES-win32-x64/
+CERES-linux-x64/
 
 # dist directory
 dist/
