@@ -141,11 +141,6 @@ class MainApp {
 
     private createTray() {
         this.tray = new Tray(__dirname + "/images/tray-icon.png");
-        this.tray.on("click", (event) => {
-            this.toggleWindow();
-            if (this.win === undefined) return;
-        });
-
         const contextMenu = Menu.buildFromTemplate([
             {
                 label: "終了",
@@ -155,18 +150,25 @@ class MainApp {
                 }
             }
         ]);
-        if (this.tray === undefined) {
-            return;
-        }
 
         this.tray.on("double-click", this.toggleWindow);
-        this.tray.on("right-click", (e) => {
-            if (this.tray === undefined) {
-                return;
-            }
-            e.preventDefault();
-            this.tray.popUpContextMenu(contextMenu);
+        this.tray.on("click", (event) => {
+            event.preventDefault();
+            this.toggleWindow();
+            if (this.win === undefined) return;
         });
+
+        if (PlatformUtils.isMac()) {
+            this.tray.on("right-click", (e) => {
+                if (this.tray === undefined) {
+                    return;
+                }
+                e.preventDefault();
+                this.tray.popUpContextMenu(contextMenu);
+            });
+        } else {
+            this.tray.setContextMenu(contextMenu);
+        }
     }
 
     private toggleWindow() {
