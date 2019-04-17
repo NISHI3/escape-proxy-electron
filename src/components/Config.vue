@@ -1,6 +1,7 @@
 <template>
     <div class="config">
         <h2 class="title">設定</h2>
+        <div class="exit-button" @click="exit">終了</div>
         <div class="config-container">
             <div class="rows">
                 <div class="row">
@@ -51,6 +52,8 @@
 </template>
 
 <script>
+    import {ipcRenderer} from "electron";
+
     export default {
         name: "Config",
         props: ["value"],
@@ -67,6 +70,9 @@
             },
             close() {
                 this.$emit("close");
+            },
+            exit(){
+                ipcRenderer.send("exit-event", undefined);
             }
         },
         created() {
@@ -86,6 +92,25 @@
 
         .title {
             text-align: center;
+        }
+
+        .exit-button{
+            width: 75px;
+            height: 30px;
+            line-height: 30px;
+            border-radius: 2px;
+            border: solid 1px rgba(white, .8);
+            font-size: 14px;
+            text-align: center;
+            letter-spacing: 2px;
+            position: fixed;
+            top: 60px;
+            right: 15px;
+            transition: background-color ease .2s;
+
+            &:hover{
+                background-color: rgba(white, .15);
+            }
         }
 
         .config-container {

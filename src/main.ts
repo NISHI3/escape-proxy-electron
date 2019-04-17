@@ -48,6 +48,7 @@ class MainApp {
         this.ipcMain.on("connect-event", this.connect.bind(this));
         this.ipcMain.on("disconnect-event", this.disconnect.bind(this));
         this.ipcMain.on("test-event", this.testEvent.bind(this));
+        this.ipcMain.on("exit-event", this.exitEvent.bind(this));
 
         this.app.on("ready", () => {
             this.setupMenus();
@@ -145,8 +146,7 @@ class MainApp {
             {
                 label: "終了",
                 click: () => {
-                    this.exitFlag = true;
-                    this.app.quit();
+                    this.exitEvent();
                 }
             }
         ]);
@@ -258,6 +258,14 @@ class MainApp {
             return;
         }
         this.client.testGet();
+    }
+
+    private exitEvent(){
+        this.exitFlag = true;
+        if (typeof this.client !== "undefined") {
+            this.client.disconnect();
+        }
+        this.app.quit();
     }
 }
 
