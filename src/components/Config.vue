@@ -1,23 +1,43 @@
 <template>
     <div class="config">
         <h2 class="title">設定</h2>
-        <div class="rows">
-            <div class="row">
-                <label>接続先PROXY</label>
-                <input id="proxy" type="text" placeholder="Host:Port" v-model="inputData.proxy">
+        <div class="config-container">
+            <div class="rows">
+                <div class="row">
+                    <label>接続先PROXY</label>
+                    <input id="proxy" type="text" placeholder="Host:Port" v-model="inputData.proxy">
+                </div>
+                <div class="row">
+                    <label>接続先GATEWAY</label>
+                    <input id="gateway" type="text" placeholder="Host:Port" v-model="inputData.gateway">
+                </div>
+                <div class="row">
+                    <label>LISTENポート</label>
+                    <input id="port" type="text" placeholder="Port" v-model="inputData.port">
+                </div>
+                <div class="row one-line">
+                    <label class="row-title">起動時に自動接続</label>
+                    <input id="auto-connect" type="checkbox" v-model="inputData.isAutoConnect">
+                    <label for="auto-connect" class="row-content"></label>
+                </div>
             </div>
-            <div class="row">
-                <label>接続先GATEWAY</label>
-                <input id="gateway" type="text" placeholder="Host:Port" v-model="inputData.gateway">
-            </div>
-            <div class="row">
-                <label>LISTENポート</label>
-                <input id="port" type="text" placeholder="Port" v-model="inputData.port">
-            </div>
-            <div class="row one-line">
-                <label class="row-title">起動時に自動接続</label>
-                <input id="auto-connect" type="checkbox" v-model="inputData.isAutoConnect">
-                <label for="auto-connect" class="row-content"></label>
+            <div class="advance-option-show" @click="showAdvanceOptions = !showAdvanceOptions">高度な設定の表示<span
+                class="advance-options-triangle" :class="{ 'shown': showAdvanceOptions }">▼</span></div>
+            <div class="advance-options rows" v-show="showAdvanceOptions">
+                <div class="row">
+                    <label>Listen host</label>
+                    <input id="host" type="text" placeholder="Host" v-model="inputData.host">
+                </div>
+                <div class="row one-line">
+                    <label for="auto-direct-mode" class="row-title">Auto direct mode</label>
+                    <input id="auto-direct-mode" type="checkbox" v-model="inputData.isAutoDirectConnect">
+                    <label for="auto-direct-mode" class="row-content"></label>
+                </div>
+                <div class="row">
+                    <label>Direct connect host</label>
+                    <input id="direct-host" type="text" placeholder="direct connect hosts(sep=',')"
+                           v-model="inputData.exclude">
+                </div>
             </div>
         </div>
 
@@ -37,6 +57,7 @@
         data() {
             return {
                 inputData: {},
+                showAdvanceOptions: false,
             };
         },
         methods: {
@@ -65,6 +86,11 @@
 
         .title {
             text-align: center;
+        }
+
+        .config-container {
+            overflow-y: auto;
+            height: calc(100% - 82px - 76px);
         }
 
         .rows {
@@ -129,7 +155,7 @@
                     margin: 0;
                 }
 
-                #auto-connect {
+                #auto-connect, #auto-direct-mode {
                     $height: 25px;
                     $width: 60px;
                     display: none;
@@ -163,6 +189,23 @@
                             transform: translateX(#{$width - $height});
                         }
                     }
+                }
+            }
+        }
+
+        .advance-option-show {
+            text-align: center;
+            font-size: 12px;
+            opacity: .8;
+            cursor: pointer;
+
+            span {
+                display: inline-block;
+                margin-left: 5px;
+                transition: transform ease .3s;
+
+                &.shown {
+                    transform: rotateZ(180deg);
                 }
             }
         }

@@ -48,12 +48,7 @@
                     connectPort: "",
                     proxy: "",
                 },
-                config: {
-                    proxy: "",
-                    gateway: "",
-                    port: "41204",
-                    isAutoConnect: false,
-                }
+                config: {}
             };
         },
         watch: {
@@ -115,7 +110,6 @@
                     ipcRenderer.send("disconnect-event", undefined);
                 } else {
                     this.incrementLoadingCount();
-                    console.log(this.config);
                     let config = new ClientConfigGen(this.config.proxy, this.config.gateway, this.config.port);
                     ipcRenderer.send("connect-event", {
                         "config": config.convertYaml(),
@@ -125,7 +119,7 @@
                 }
             },
             testGet() {
-                if (this.reGetCount > 20) {
+                if (this.reGetCount > 5) {
                     this.decrementLoadingCount();
                     return;
                 }
@@ -151,12 +145,11 @@
         },
         created() {
             storage.get("connect-config", (error, data) => {
-                if (error) return;
-
-                if (Object.keys(data).length !== 0) {
-                    this.config = data;
+                if (error) {
+                    this.config = ClientConfigGen.mergeSettingsDefault();
+                    return;
                 }
-
+                this.config = ClientConfigGen.mergeSettingsDefault(data);
                 if (this.config.isAutoConnect) {
                     this.connectToggle();
                 }
@@ -316,7 +309,7 @@
             transition: opacity ease .2s;
         }
 
-        &::after{
+        &::after {
             display: block;
             $over-size: 30px;
             $loading-size: $size + $over-size;
@@ -341,7 +334,7 @@
                 animation: spin 1s linear infinite;
             }
 
-            &::after{
+            &::after {
                 opacity: 0;
                 animation: none;
             }
