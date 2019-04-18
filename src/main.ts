@@ -79,7 +79,7 @@ class MainApp {
             frame: !PlatformUtils.isMac(),
             fullscreenable: false,
             resizable: false,
-            transparent: true,
+            transparent: !PlatformUtils.isWindows(),
             webPreferences: {
                 backgroundThrottling: false
             }
