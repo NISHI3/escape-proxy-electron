@@ -148,6 +148,12 @@ class MainApp {
                 click: () => {
                     this.exitEvent();
                 }
+            },
+            {
+                label: "表示・非表示",
+                click: () => {
+                    this.toggleWindow();
+                }
             }
         ]);
 
